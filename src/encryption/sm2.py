@@ -1,3 +1,5 @@
+import json
+
 from gmssl import sm2
 
 
@@ -22,3 +24,7 @@ class SM2Encryption(object):
             asn1=asn1,
             mode=mode)
         return sm2_crypt.decrypt(bytes.fromhex(text))
+
+    def decrypt_object(self, cipher_text: str, asn1: bool = True, mode: int = 1) -> dict:
+        byts = self.decrypt(cipher_text, asn1, mode)
+        return json.loads(byts)
