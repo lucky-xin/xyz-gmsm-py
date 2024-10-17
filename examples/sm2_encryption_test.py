@@ -7,7 +7,7 @@ if __name__ == '__main__':
     encryption = SM2Encryption(private_key, public_key)
     plaintext = "你可以根据具体需求正确地挂载文件或目录到Kubernetes Pod内的容器中。如果有任何其他问题或需要进一步的帮助，请随时提问。"
 
-    enc_data = encryption.encrypt_2_hex(plaintext.encode(), True, 1)
+    enc_data = '04' + encryption.encrypt_2_hex(plaintext.encode(), True, 1)
     print(enc_data)
     print('------------------')
 

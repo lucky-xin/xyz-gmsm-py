@@ -98,6 +98,8 @@ class SM2Encryption(object):
         来解密传入的密文。函数接收公钥和私钥，以及是否使用ASN.1编码格式和加密模式，
         并返回解密后的明文数据。
         """
+        # 如果密文以“04”开头，则去掉前导“04”；否则，密文保持不变。
+        cipher_byts = cipher_byts[1:] if cipher_byts[0] == 4 else cipher_byts
         # 创建SM2加密对象，初始化时指定公钥、私钥、ASN.1编码格式以及加密模式
         sm2_crypt = sm2.CryptSM2(
             public_key=self._public_key,
@@ -118,7 +120,6 @@ class SM2Encryption(object):
         :return: 解密后的字节数据。
         """
         # 移除密文前的特定前缀，如果存在的话
-        cipher_text = cipher_text.lstrip("MDQ=") if cipher_text.startswith("MDQ=") else cipher_text
         # 调用底层的decrypt方法进行实际解密操作，传入Base64解码后的密文
         return self.decrypt(base64.b64decode(cipher_text), asn1, mode)
 
@@ -131,8 +132,6 @@ class SM2Encryption(object):
         :param mode: 解密模式，默认为1。
         :return: 解密后的字节数据。
         """
-        # 如果密文以“04”开头，则去掉前导“04”；否则，密文保持不变。
-        cipher_text = cipher_text.lstrip("04") if cipher_text.startswith("04") else cipher_text
         # 将十六进制密文转换为字节，并调用decrypt方法进行解密。
         return self.decrypt(bytes.fromhex(cipher_text), asn1, mode)
 
