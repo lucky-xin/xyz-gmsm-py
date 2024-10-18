@@ -2,7 +2,7 @@ __title__ = 'serialization'
 __author__ = 'chaoxin.lu'
 __email__ = 'chaoxin.lu@pistonint.com'
 
-__all__ = ['SM2']
+__all__ = ['SM2', 'SM3', 'SM4']
 
 import base64
 import json
