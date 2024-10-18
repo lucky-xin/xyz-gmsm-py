@@ -2,15 +2,16 @@ __title__ = 'serialization'
 __author__ = 'chaoxin.lu'
 __email__ = 'chaoxin.lu@pistonint.com'
 
-__all__ = ['SM2Encryption']
+__all__ = ['SM2']
 
 import base64
 import json
 
-from gmssl import sm2
+from gmssl import sm2, sm3
+from gmssl.sm4 import CryptSM4, SM4_ENCRYPT, PKCS7, SM4_DECRYPT
 
 
-class SM2Encryption(object):
+class SM2(object):
     def __init__(self, private_key: str, public_key: str):
         self._public_key = public_key
         self._private_key = private_key
@@ -152,3 +153,58 @@ class SM2Encryption(object):
         # 将解密后的字节串转换为字典并返回
         return json.loads(byts)
 
+
+class SM4(object):
+    def __init__(self, key: bytes, iv: bytes):
+        self._key = key
+        self._iv = iv
+
+    def encrypt(self, plain_byts: bytes) -> bytes:
+        # 实例化SM4加密对象，准备进行加密操作
+        sm4 = CryptSM4(
+            mode=SM4_ENCRYPT,
+            padding_mode=PKCS7
+        )
+        sm4.set_key(self._key, SM4_ENCRYPT)
+        # 执行加密并返回加密后的数据
+        return sm4.crypt_cbc(self._iv, plain_byts)
+
+    def encrypt_2_hex(self, plain_byts: bytes) -> str:
+        # 调用encrypt方法进行加密，然后将结果转为十六进制字符串
+        return self.encrypt(plain_byts).hex()
+
+    def encrypt_2_base64(self, plain_text) -> str:
+        # 调用encrypt方法加密明文，并使用Base64编码
+        return base64.b64encode(self.encrypt(plain_text)).decode('utf8')
+
+    def decrypt(self, cipher_byts: bytes) -> bytes:
+        # 实例化SM4加密对象，准备进行加密操作
+        sm4 = CryptSM4(
+            mode=SM4_DECRYPT,
+            padding_mode=PKCS7
+        )
+        sm4.set_key(self._key, SM4_DECRYPT)
+        # 执行加密并返回加密后的数据
+        return sm4.crypt_cbc(self._iv, cipher_byts)
+
+    def decrypt_base64(self, cipher_text: str) -> bytes:
+        # 移除密文前的特定前缀，如果存在的话
+        # 调用底层的decrypt方法进行实际解密操作，传入Base64解码后的密文
+        return self.decrypt(base64.b64decode(cipher_text))
+
+    def decrypt_hex(self, cipher_text: str) -> bytes:
+        # 将十六进制密文转换为字节，并调用decrypt方法进行解密。
+        return self.decrypt(bytes.fromhex(cipher_text))
+
+    def decrypt_object(self, cipher_byts: bytes) -> dict:
+        # 调用decrypt方法解密密文，得到字节串
+        byts = self.decrypt(cipher_byts)
+        # 将解密后的字节串转换为字典并返回
+        return json.loads(byts)
+
+
+class SM3(object):
+
+    def hash(self, plaintext: str) -> bytes:
+        msg_list = [i for i in bytes(plaintext.encode('UTF-8'))]
+        return sm3.sm3_hash(msg_list)

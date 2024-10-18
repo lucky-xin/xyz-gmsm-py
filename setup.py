@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '1.0.3'  # 版本号
+__version__ = '1.1.0'  # 版本号
 requirements = open('requirements.txt').readlines()  # 依赖文件
 
 setup(
